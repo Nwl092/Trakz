@@ -41,8 +41,8 @@
     --max:1120px;
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{margin:0;background:var(--papier);color:var(--encre);
+  html{scroll-behavior:smooth;overflow-x:hidden}
+  body{margin:0;background:var(--papier);color:var(--encre);overflow-x:hidden;
     font-family:"Public Sans",system-ui,-apple-system,sans-serif;
     font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
   h1,h2,h3,.dep{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;
@@ -606,6 +606,13 @@
   #ouvrirRech svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2;
     stroke-linecap:round}
   @media(max-width:560px){ #ouvrirRech{right:14px;bottom:14px;padding:12px 16px;font-size:14px} }
+  /* Sur petit écran, le bouton de recherche flottant peut recouvrir la dernière ligne
+     de réassurance du héros selon la hauteur d'écran : on l'estompe tant qu'on est dans
+     le héros, exactement comme la barre d'achat qui n'apparaît qu'une fois dépassé. */
+  @media(max-width:560px){
+    #ouvrirRech{opacity:0;pointer-events:none;transition:opacity .25s ease}
+    #ouvrirRech.vu{opacity:1;pointer-events:auto}
+  }
   #voileRech{position:fixed;inset:0;z-index:70;background:rgba(19,42,38,.42);
     backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .22s ease}
   #voileRech.on{opacity:1;pointer-events:auto}
@@ -1833,6 +1840,12 @@ if(typeof window.CONFIG === "undefined"){
         const dehors = !en.isIntersecting;
         barre.classList.toggle("vu", dehors);
         barre.setAttribute("aria-hidden", dehors ? "false" : "true");
+        /* Le bouton de recherche flottant peut chevaucher la dernière ligne de
+           réassurance du héros sur petit écran : masqué tant qu'on y est encore.
+           Cherché à chaque déclenchement, pas à l'initialisation : ce bouton est
+           défini plus bas dans la page, donc absent du DOM à ce stade-ci. */
+        const boutonRech = document.getElementById("ouvrirRech");
+        if(boutonRech) boutonRech.classList.toggle("vu", dehors);
       });
     }, { threshold: 0 });
     obsB.observe(repere);
