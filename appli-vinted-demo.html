@@ -5624,7 +5624,31 @@ function brancher(){
     const el=q("#"+id); if(!el) return;
     const cle = id==="cAchat" ? "achat" : id==="cRev" ? "revente" : "qte";
     el.oninput = () => { calc[cle] = el.value; };
-    el.onchange = () => { calc[cle] = el.value; rendre(); };
+    /* Les trois champs sont voisins : cliquer ou tabuler de l'un vers l'autre
+       déclenche ce onchange AVANT que le focus n'arrive sur le suivant. Comme
+       rendre() reconstruit tout le HTML, le champ qu'on visait est détruit et
+       recréé sous nos pieds — la frappe suivante tombe dans le vide. On laisse
+       la transition de focus se terminer (le tick suivant), puis on rejoue le
+       focus (et la position du curseur) sur l'élément qui l'avait au moment
+       du rendu. */
+    el.onchange = () => {
+      calc[cle] = el.value;
+      setTimeout(() => {
+        const actif = document.activeElement;
+        const idActif = actif && actif.id;
+        const pos = actif && typeof actif.selectionStart === "number" ? actif.selectionStart : null;
+        rendre();
+        if(idActif){
+          const repris = document.getElementById(idActif);
+          if(repris){
+            repris.focus();
+            if(pos !== null && typeof repris.setSelectionRange === "function"){
+              try{ repris.setSelectionRange(pos, pos); }catch(e){}
+            }
+          }
+        }
+      }, 0);
+    };
   });
 
   document.querySelectorAll("[data-semonglet]").forEach(b=>b.onclick=()=>{
