@@ -39,6 +39,7 @@
     --encre:#12233A; --papier:#F7F3EC; --carte:#FFFFFF;
     --signal:#2F5573; --sable:#F1E9D6; --trait:#E3DCC9; --doux:#66605A;
     --bon:#1D6E4F; --alerte:#9E2B2B; --ambre:#96600A;
+    --cta:#B8451A; --cta-fonce:#8C3810;
     --max:1120px;
   }
   *{box-sizing:border-box}
@@ -83,11 +84,11 @@
   .liens a{text-decoration:none;color:var(--doux)}
   .liens a:hover{color:var(--encre)}
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
-    padding:14px 24px;border-radius:12px;border:1.5px solid var(--encre);
-    background:var(--encre);color:var(--papier);text-decoration:none;
+    padding:14px 24px;border-radius:12px;border:1.5px solid var(--cta-fonce);
+    background:linear-gradient(135deg,var(--cta),var(--cta-fonce));color:#fff;text-decoration:none;
     font-weight:600;font-size:16px;cursor:pointer;font-family:inherit;
     transition:transform .12s ease,box-shadow .12s ease}
-  .btn:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(19,42,38,.2)}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(140,56,16,.32)}
   .btn.creux{background:transparent;color:var(--encre)}
   .btn.creux:hover{background:var(--encre);color:var(--papier)}
   .btn.mini{padding:9px 16px;font-size:14.5px;border-radius:9px}
