@@ -1,0 +1,15 @@
+{
+  "name": "Trakz",
+  "short_name": "Trakz",
+  "description": "Trakz suit tes annonces, ton stock, tes colis et tes seuils de déclaration, avec une facturation conforme et 22 guides intégrés.",
+  "start_url": "/app.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F7F3EC",
+  "theme_color": "#12233A",
+  "lang": "fr",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
