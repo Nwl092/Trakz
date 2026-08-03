@@ -526,7 +526,7 @@
   /* ═══════════ vitrine des graphiques ═══════════ */
   .gal{display:grid;grid-template-columns:1.45fr 1fr;gap:16px}
   @media(max-width:880px){ .gal{grid-template-columns:1fr} }
-  .gcarte{background:var(--tuile);border:1px solid var(--trait);border-radius:18px;
+  .gcarte{position:relative;background:var(--tuile);border:1px solid var(--trait);border-radius:18px;
     padding:22px 22px 18px;transition:transform .2s ease,box-shadow .2s ease}
   .gcarte:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(19,42,38,.09)}
   .gcarte.sombre{background:var(--encre);border-color:transparent;color:var(--papier)}
@@ -543,7 +543,7 @@
   .g-legende{display:flex;gap:16px;font-size:12.5px;color:var(--doux);margin-top:10px}
   .g-legende span{display:flex;align-items:center;gap:6px}
   .g-legende i{width:10px;height:10px;border-radius:3px;display:block}
-  svg.courbe{display:block;width:100%;height:172px;overflow:visible}
+  svg.courbe{display:block;width:100%;height:172px;overflow:visible;cursor:crosshair}
   svg.courbe .axe{stroke:var(--trait);stroke-width:1}
   svg.courbe .lig{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;
     vector-effect:non-scaling-stroke;
@@ -551,23 +551,40 @@
     transition:stroke-dashoffset 1.5s cubic-bezier(.4,.05,.2,1)}
   .vu svg.courbe .lig{stroke-dashoffset:0}
   svg.courbe text{font-size:9px;fill:var(--doux);font-family:"Public Sans",sans-serif}
+  .g-guide{stroke:var(--doux);stroke-width:1;stroke-dasharray:3 3;opacity:0;
+    transition:opacity .15s ease;pointer-events:none}
+  .g-guide.actif{opacity:1}
+  .g-pt-hover{opacity:0;transition:opacity .15s ease;pointer-events:none}
+  .g-pt-hover.actif{opacity:1}
   .chaleur{display:grid;grid-template-columns:34px repeat(7,1fr);gap:4px;font-size:11.5px}
   .chaleur .jr{color:var(--encre);text-align:center;font-size:12px;font-weight:600;padding-bottom:4px}
   .chaleur .hr{color:var(--encre);font-size:11.5px;font-weight:500;display:flex;align-items:center}
   .chaleur i{display:block;aspect-ratio:1;border-radius:4px;background:var(--signal);
-    transform:scale(.5);opacity:0;transition:transform .5s cubic-bezier(.3,1.4,.4,1),opacity .4s}
+    transform:scale(.5);opacity:0;transition:transform .25s cubic-bezier(.3,1.4,.4,1),opacity .4s,box-shadow .15s}
   .vu .chaleur i{transform:scale(1);opacity:1}
+  .vu .chaleur i:hover{transform:scale(1.18) !important;box-shadow:0 4px 12px rgba(19,42,38,.3);cursor:pointer}
   .anneau-zone{display:flex;align-items:center;gap:20px}
   @media(max-width:420px){ .anneau-zone{flex-direction:column;align-items:flex-start} }
   svg.anneau{flex:0 0 132px;width:132px;height:132px;transform:rotate(-90deg)}
   svg.anneau circle{fill:none;stroke-width:17;stroke-linecap:butt;
     stroke-dasharray:var(--D);stroke-dashoffset:var(--D);
-    transition:stroke-dashoffset 1.1s cubic-bezier(.3,.9,.3,1)}
+    transition:stroke-dashoffset 1.1s cubic-bezier(.3,.9,.3,1),stroke-width .15s ease,filter .15s ease}
   .vu svg.anneau circle{stroke-dashoffset:var(--O)}
+  svg.anneau circle[data-idx]{cursor:pointer}
+  svg.anneau circle.actif{stroke-width:20;filter:brightness(1.12)}
   .anneau-lst{display:grid;gap:9px;font-size:13.5px;flex:1;min-width:0}
-  .anneau-lst div{display:flex;align-items:center;gap:9px}
+  .anneau-lst div{display:flex;align-items:center;gap:9px;border-radius:8px;
+    padding:4px 6px;margin:-4px -6px;transition:background .15s ease;cursor:pointer}
+  .anneau-lst div:hover,.anneau-lst div.actif{background:rgba(19,42,38,.06)}
   .anneau-lst i{width:11px;height:11px;border-radius:3px;flex:0 0 11px}
   .anneau-lst b{margin-left:auto;font-variant-numeric:tabular-nums}
+  .gtip{position:absolute;z-index:5;pointer-events:none;background:var(--encre);color:var(--papier);
+    font-size:12px;font-weight:700;padding:7px 10px;border-radius:8px;
+    box-shadow:0 8px 20px rgba(19,42,38,.26);opacity:0;
+    transform:translate(-50%,-100%) translateY(-8px) scale(.92);
+    transition:opacity .15s ease,transform .15s ease;white-space:nowrap;line-height:1.4}
+  .gtip.actif{opacity:1;transform:translate(-50%,-100%) translateY(-12px) scale(1)}
+  .gtip small{display:block;font-weight:500;color:#C9C2AE;font-size:10.5px;margin-top:2px}
 
   /* ═══════════ calculateur ═══════════ */
   .calc{display:grid;grid-template-columns:1fr 1fr;gap:clamp(22px,4vw,44px);align-items:start;
@@ -831,7 +848,7 @@
       <span class="fleche">→</span>
     </a>
     <a class="menu-rang" href="appli-vinted-demo.html" target="_blank" rel="noopener">
-      <span>Essayer la démo<small>Sans compte, avec des données d'exemple</small></span>
+      <span>Essai gratuit — 3 jours<small>Sans compte, avec des données d'exemple</small></span>
       <span class="fleche">→</span>
     </a>
     <a class="menu-rang" data-cible="#demarrage">
@@ -889,7 +906,7 @@
         <a class="btn" id="btnHero" href="#prix">Obtenir l'accès — 29 €</a>
         <a class="btn creux" href="connexion.html">J'ai déjà un compte</a>
       </div>
-      <p class="lien-demo">Envie de voir avant ? <a href="appli-vinted-demo.html" target="_blank" rel="noopener">Essayer la démo, sans compte à créer →</a></p>
+      <p class="lien-demo">Envie de voir avant ? <a href="appli-vinted-demo.html" target="_blank" rel="noopener">Essai gratuit 3 jours, sans compte à créer →</a></p>
       <div class="rassure">
         <span>Aucun accès à ton compte Vinted</span>
         <span>Factures et registres conformes</span>
@@ -1611,6 +1628,9 @@
     <details><summary>Je vends sur plusieurs comptes, c'est prévu ?</summary>
       <p>Oui. Tu configures autant de canaux de vente que tu veux, et chaque annonce, vente et seuil de déclaration est suivi par canal — avec le total consolidé, qui est celui qui compte pour ta déclaration.</p></details>
 
+    <details><summary>Puis-je essayer avant d'acheter ?</summary>
+      <p>Oui. La démo est un vrai essai gratuit de trois jours, sans compte à créer : tu retrouves l'interface avec des données d'exemple, en version simplifiée — les statistiques avancées et le texte complet des guides sont réservés à la version payée. De quoi te faire une idée avant de sortir la carte bancaire.</p></details>
+
     <details><summary>C'est un abonnement déguisé ?</summary>
       <p>Non. Un paiement, un accès. Nous n'avons aucun coût récurrent à couvrir puisque l'application ne tourne pas sur un serveur.</p></details>
 
@@ -1990,6 +2010,63 @@ if(typeof window.CONFIG === "undefined"){
     [lc, document.getElementById("ligBn")].forEach(function(p){
       p.style.setProperty("--L", p.getTotalLength());
     });
+
+    /* ---- survol : ligne-guide, points et infobulle ---- */
+    const moisLong = ["Août","Septembre","Octobre","Novembre","Décembre","Janvier",
+      "Février","Mars","Avril","Mai","Juin","Juillet"];
+    const svgEl = lc.closest("svg"), carte = document.getElementById("gCourbe");
+    if(svgEl && carte && !doux){
+      const NS = "http://www.w3.org/2000/svg";
+      const hit = document.createElementNS(NS, "rect");
+      hit.setAttribute("x","0"); hit.setAttribute("y","0");
+      hit.setAttribute("width", W); hit.setAttribute("height", H);
+      hit.setAttribute("fill","transparent");
+      svgEl.appendChild(hit);
+
+      const guide = document.createElementNS(NS, "line");
+      guide.setAttribute("class","g-guide");
+      guide.setAttribute("y1","4"); guide.setAttribute("y2", H-gb);
+      const ptCa = document.createElementNS(NS, "circle");
+      ptCa.setAttribute("r","4"); ptCa.setAttribute("fill","#12233A");
+      ptCa.setAttribute("class","g-pt-hover");
+      const ptBn = document.createElementNS(NS, "circle");
+      ptBn.setAttribute("r","4"); ptBn.setAttribute("fill","#1D6E4F");
+      ptBn.setAttribute("class","g-pt-hover");
+      svgEl.appendChild(guide); svgEl.appendChild(ptCa); svgEl.appendChild(ptBn);
+
+      const tip = document.createElement("div");
+      tip.className = "gtip";
+      carte.appendChild(tip);
+
+      const pas = (W-gx-8)/(mois.length-1);
+      function idxDepuis(clientX){
+        const r = svgEl.getBoundingClientRect();
+        const xSvg = ((clientX - r.left) / r.width) * W;
+        return Math.max(0, Math.min(mois.length-1, Math.round((xSvg - gx)/pas)));
+      }
+      function survole(clientX){
+        const i = idxDepuis(clientX);
+        const x = X(i), yCa = Y(ca[i]), yBn = Y(bn[i]);
+        guide.setAttribute("x1", x); guide.setAttribute("x2", x);
+        ptCa.setAttribute("cx", x); ptCa.setAttribute("cy", yCa);
+        ptBn.setAttribute("cx", x); ptBn.setAttribute("cy", yBn);
+        guide.classList.add("actif"); ptCa.classList.add("actif"); ptBn.classList.add("actif");
+        tip.innerHTML = "<b>"+moisLong[i]+"</b><small>CA "+eur(ca[i])+" · Bénéfice "+eur(bn[i])+"</small>";
+        const rSvg = svgEl.getBoundingClientRect(), rCarte = carte.getBoundingClientRect();
+        tip.style.left = (rSvg.left - rCarte.left + (x/W)*rSvg.width) + "px";
+        tip.style.top = Math.max(0, rSvg.top - rCarte.top + (yCa/H)*rSvg.height) + "px";
+        tip.classList.add("actif");
+      }
+      function quitte(){
+        guide.classList.remove("actif"); ptCa.classList.remove("actif"); ptBn.classList.remove("actif");
+        tip.classList.remove("actif");
+      }
+      hit.addEventListener("mousemove", e => survole(e.clientX));
+      hit.addEventListener("mouseleave", quitte);
+      hit.addEventListener("touchstart", e => survole(e.touches[0].clientX), {passive:true});
+      hit.addEventListener("touchmove", e => survole(e.touches[0].clientX), {passive:true});
+      hit.addEventListener("touchend", quitte);
+    }
   })();
 
   /* ---- carte de chaleur jour × créneau ---- */
@@ -1997,20 +2074,43 @@ if(typeof window.CONFIG === "undefined"){
     const z = document.getElementById("grilleChaleur");
     if(!z) return;
     const jrs = ["L","M","M","J","V","S","D"];
+    const jrsLong = ["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
     const crn = ["8h","12h","15h","18h","20h","22h"];
     const val = [
       [1,2,1,2,2,4,3],[3,3,2,3,4,6,5],[2,2,2,2,3,5,4],
       [4,4,3,4,5,7,6],[7,7,6,7,8,9,9],[5,5,4,5,6,8,7]
     ];
+    const niveaux = ["très calme","calme","modéré","actif","très actif","pic de ventes"];
     let h = '<div></div>' + jrs.map(j => '<div class="jr">'+j+'</div>').join("");
     val.forEach(function(ligne, i){
       h += '<div class="hr">'+crn[i]+'</div>';
       ligne.forEach(function(v, k){
+        const niv = niveaux[Math.min(niveaux.length-1, Math.round(v/9*(niveaux.length-1)))];
         h += '<i style="opacity:0;transition-delay:'+((i*7+k)*11)+'ms" '+
-             'data-o="'+(0.12 + v/9*0.88).toFixed(2)+'"></i>';
+             'data-o="'+(0.12 + v/9*0.88).toFixed(2)+'" data-jr="'+jrsLong[k]+'" '+
+             'data-cr="'+crn[i]+'" data-niv="'+niv+'"></i>';
       });
     });
     z.innerHTML = h;
+
+    if(!doux){
+      const carte = document.getElementById("gChaleur");
+      const tip = document.createElement("div");
+      tip.className = "gtip";
+      carte.appendChild(tip);
+      z.addEventListener("mouseover", function(e){
+        const cel = e.target.closest("i");
+        if(!cel || !z.contains(cel)) return;
+        tip.innerHTML = "<b>"+cel.dataset.jr+" · "+cel.dataset.cr+"</b><small>Activité "+cel.dataset.niv+"</small>";
+        const rI = cel.getBoundingClientRect(), rC = carte.getBoundingClientRect();
+        tip.style.left = (rI.left - rC.left + rI.width/2) + "px";
+        tip.style.top = (rI.top - rC.top) + "px";
+        tip.classList.add("actif");
+      });
+      z.addEventListener("mouseout", function(e){
+        if(e.target.closest("i")) tip.classList.remove("actif");
+      });
+    }
   })();
 
   /* ---- anneaux ---- */
@@ -2020,17 +2120,48 @@ if(typeof window.CONFIG === "undefined"){
     const R = 51.5, C = 2*Math.PI*R;
     let acc = 0, h = '<circle cx="60" cy="60" r="'+R+'" stroke="rgba(19,42,38,.07)" '+
       'style="--D:'+C+';--O:0"/>';
-    parts.forEach(function(p){
+    parts.forEach(function(p, idx){
       const long = C * (p.v/100);
-      h += '<circle cx="60" cy="60" r="'+R+'" stroke="'+p.c+'" '+
+      h += '<circle cx="60" cy="60" r="'+R+'" stroke="'+p.c+'" data-idx="'+idx+'" '+
         'style="--D:'+C+';--O:'+(C-long).toFixed(2)+';transform:rotate('+(acc*3.6)+'deg);'+
         'transform-origin:60px 60px;transition-delay:'+(acc*4)+'ms"/>';
       acc += p.v;
     });
     sv.innerHTML = h;
     const l = listeId && document.getElementById(listeId);
-    if(l) l.innerHTML = parts.map(p =>
-      '<div><i style="background:'+p.c+'"></i> '+p.n+' <b>'+p.v+' %</b></div>').join("");
+    if(l) l.innerHTML = parts.map(function(p, idx){
+      return '<div data-idx="'+idx+'"><i style="background:'+p.c+'"></i> '+p.n+' <b>'+p.v+' %</b></div>';
+    }).join("");
+
+    if(doux) return;
+    const carte = sv.closest(".gcarte");
+    if(!carte) return;
+    let tip = carte.querySelector(".gtip");
+    if(!tip){ tip = document.createElement("div"); tip.className = "gtip"; carte.appendChild(tip); }
+    const cercles = Array.from(sv.querySelectorAll("circle[data-idx]"));
+    function survoler(idx, ref){
+      cercles.forEach(c => c.classList.toggle("actif", +c.dataset.idx === idx));
+      if(l) Array.from(l.children).forEach(c => c.classList.toggle("actif", +c.dataset.idx === idx));
+      const p = parts[idx];
+      tip.innerHTML = "<b>"+p.n+"</b><small>"+p.v+" %</small>";
+      const r = ref.getBoundingClientRect(), rC = carte.getBoundingClientRect();
+      tip.style.left = (r.left - rC.left + r.width/2) + "px";
+      tip.style.top = (r.top - rC.top) + "px";
+      tip.classList.add("actif");
+    }
+    function quitter(){
+      cercles.forEach(c => c.classList.remove("actif"));
+      if(l) Array.from(l.children).forEach(c => c.classList.remove("actif"));
+      tip.classList.remove("actif");
+    }
+    cercles.forEach(function(c){
+      c.addEventListener("mouseenter", function(){ survoler(+c.dataset.idx, c); });
+      c.addEventListener("mouseleave", quitter);
+    });
+    if(l) Array.from(l.children).forEach(function(row){
+      row.addEventListener("mouseenter", function(){ survoler(+row.dataset.idx, row); });
+      row.addEventListener("mouseleave", quitter);
+    });
   }
   anneau("svgAnneau", [
     {n:"Vestes et manteaux", v:38, c:"#12233A"},
