@@ -5820,83 +5820,147 @@ if(!data.config){ configInitiale(); } else { appliquerConfig(); rendre(); }
 phLibCharger().then(() => { if(data.config && onglet === "photo") rendre(); });
 if(window.indexedDB && data.config){ setTimeout(()=>svSauver(true), 1500); }
 </script>
+<script src="config.js?v=3"></script>
 <script>
-/* ==== Essai gratuit : trois jours, fonctions réduites =======================
-   La démo n'est plus un accès permanent : c'est un vrai essai, limité dans le
-   temps et dans les fonctions avancées, pour donner une vraie raison de
-   passer à la version complète plutôt que de s'installer indéfiniment dans
-   la gratuite. */
+/* ==== Essai gratuit : e-mail requis, trois jours, fonctions réduites =======
+   La démo n'est plus un accès permanent : c'est un vrai essai, demandé avec
+   une adresse e-mail, limité dans le temps et dans les fonctions avancées —
+   de quoi donner une vraie raison de passer à la version complète plutôt que
+   de s'installer indéfiniment dans la gratuite. */
 (function(){
   const CLE_ESSAI = "trakz-essai-debut";
-  let debut;
-  try{
-    debut = localStorage.getItem(CLE_ESSAI);
-    if(!debut){ debut = String(Date.now()); localStorage.setItem(CLE_ESSAI, debut); }
-  }catch(e){ debut = String(Date.now()); }
-  const joursEcoules = (Date.now() - Number(debut)) / 86400000;
-  const joursRestants = Math.max(0, Math.ceil(3 - joursEcoules));
+  const CLE_EMAIL = "trakz-essai-email";
+  let debut = null;
+  try{ debut = localStorage.getItem(CLE_ESSAI); }catch(e){}
 
-  /* --- essai expiré : plus aucune donnée à l'écran, juste l'accès à acheter --- */
-  if(joursEcoules >= 3){
-    const entete = document.querySelector("header"), nv = document.querySelector("nav"),
-          br = document.getElementById("bReglages"), v = document.getElementById("vue");
-    if(entete) entete.style.display = "none";
-    if(nv) nv.style.display = "none";
-    if(br) br.style.display = "none";
-    if(v) v.innerHTML =
+  function masquer(el){ if(el) el.style.display = "none"; }
+  function montrer(el){ if(el) el.style.display = ""; }
+  const entete = () => document.querySelector("header");
+  const nav = () => document.querySelector("nav");
+  const gear = () => document.getElementById("bReglages");
+  const vue = () => document.getElementById("vue");
+
+  /* Best effort : si la table n'existe pas encore côté Supabase (voir
+     GUIDE-SUPABASE.md, étape 12), l'essai démarre quand même — on ne
+     bloque jamais l'accès pour un problème de collecte d'e-mail. */
+  function enregistrerEmail(email){
+    if(!window.CONFIG || !window.CONFIG.supabaseUrl || !window.CONFIG.supabaseKey) return;
+    fetch(window.CONFIG.supabaseUrl + "/rest/v1/essais_gratuits", {
+      method: "POST",
+      headers: {
+        "apikey": window.CONFIG.supabaseKey,
+        "Authorization": "Bearer " + window.CONFIG.supabaseKey,
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify([{ email: email }])
+    }).catch(function(){});
+  }
+
+  function afficherPorteEmail(){
+    masquer(entete()); masquer(nav()); masquer(gear());
+    const v = vue();
+    if(!v) return;
+    v.innerHTML =
       '<div class="carte" style="text-align:center;padding:36px 22px">'+
-      '<div class="titre" style="font-size:19px">Ton essai gratuit est terminé</div>'+
-      '<div class="vide" style="margin:10px 0 22px">Tu as testé Trakz pendant trois jours, avec des données d’exemple. '+
-      'La version complète fait la même chose avec tes vraies ventes — sans limite de temps, sans fonction en moins.</div>'+
-      '<a href="index.html#prix" class="btn2" style="display:block;text-decoration:none;background:var(--ink);'+
-      'color:#fff;border-color:var(--ink);font-weight:600">Voir le tarif — 29 € une fois</a>'+
+      '<div class="titre" style="font-size:19px">Ton essai gratuit de 3 jours</div>'+
+      '<div class="vide" style="margin:10px 0 20px">Entre ton e-mail pour démarrer. On s’en sert seulement '+
+      'pour te prévenir avant la fin de ton essai — rien d’autre, aucune newsletter.</div>'+
+      '<div class="champ" style="text-align:left"><label for="essaiEmail">Adresse e-mail</label>'+
+      '<input id="essaiEmail" type="email" placeholder="toi@exemple.fr" autocomplete="email"></div>'+
+      '<button id="essaiDemarrer" class="btn">Démarrer mon essai gratuit</button>'+
       '<div class="vide" style="margin-top:16px"><a href="index.html" style="color:inherit">← Retour au site</a></div>'+
       '</div>';
-    window.rendre = function(){};
-    window.sauver = function(){};
-    return;
-  }
-
-  /* --- pendant l'essai : mode Essentiel verrouillé + bandeau de compte à rebours --- */
-  if(typeof data !== "undefined"){ data.mode = "simple"; try{ sauver(); }catch(e){} }
-
-  const bandeau = document.createElement("div");
-  bandeau.style.cssText = "background:var(--ink);color:#fff;padding:9px 132px 9px 16px;font-size:12.5px;"+
-    "line-height:1.4;text-align:center;font-family:system-ui,-apple-system,sans-serif;position:relative;z-index:6";
-  bandeau.innerHTML = "Essai gratuit — encore "+joursRestants+" jour"+(joursRestants>1?"s":"")+
-    ' · <a href="index.html#prix" style="color:#fff;text-decoration:underline;font-weight:600">Débloquer la version complète</a>';
-  document.body.insertBefore(bandeau, document.body.firstChild);
-
-  /* Les modes Complet et Tout afficher restent réservés à la version payée. */
-  document.addEventListener("click", function(e){
-    const b = e.target && e.target.closest && e.target.closest('[data-mode="complet"],[data-mode="tout"]');
-    if(!b) return;
-    e.preventDefault(); e.stopImmediatePropagation();
-    if(typeof flash === "function")
-      flash("Réservé à la version complète — 29 € une fois, sans abonnement.");
-  }, true);
-
-  /* Le sommaire des 22 guides reste consultable ; le texte de chaque partie
-     est réservé à la version payée. */
-  if(typeof vueEbook === "function"){
-    const ebookOriginal = vueEbook;
-    vueEbook = function(){
-      if(typeof ebLivre !== "undefined" && ebLivre !== null &&
-         typeof ebPartie !== "undefined" && ebPartie !== null){
-        const l = EBOOKS[ebLivre];
-        return '<div class="carte">'+
-          '<button class="act" id="ebRetour" style="flex:0 0 auto">‹ Tous les guides</button>'+
-          '<div class="titre" style="margin-top:16px;font-size:17px;letter-spacing:0;text-transform:none">'+
-          esc(l.p[ebPartie].t)+'</div>'+
-          '<div class="vide" style="margin-top:10px">Le texte de ce guide fait partie de la version complète. '+
-          'L’essai gratuit donne accès au sommaire des 22 guides, pas encore à leur contenu.</div>'+
-          '<a href="index.html#prix" class="btn2" style="display:block;text-decoration:none;background:var(--ink);'+
-          'color:#fff;border-color:var(--ink);font-weight:600;margin-top:6px">'+
-          'Débloquer les 22 guides — 29 € une fois</a></div>';
+    const champ = document.getElementById("essaiEmail");
+    const go = function(){
+      const email = (champ.value || "").trim();
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        if(typeof flash === "function") flash("Adresse e-mail invalide.");
+        champ.focus();
+        return;
       }
-      return ebookOriginal();
+      const maintenant = String(Date.now());
+      try{
+        localStorage.setItem(CLE_ESSAI, maintenant);
+        localStorage.setItem(CLE_EMAIL, email);
+      }catch(e){}
+      enregistrerEmail(email);
+      debut = maintenant;
+      demarrerEssai();
     };
+    document.getElementById("essaiDemarrer").onclick = go;
+    champ.addEventListener("keydown", function(e){ if(e.key === "Enter") go(); });
+    champ.focus();
   }
+
+  function demarrerEssai(){
+    const joursEcoules = (Date.now() - Number(debut)) / 86400000;
+    const joursRestants = Math.max(0, Math.ceil(3 - joursEcoules));
+
+    /* --- essai expiré : plus aucune donnée à l'écran, juste l'accès à acheter --- */
+    if(joursEcoules >= 3){
+      masquer(entete()); masquer(nav()); masquer(gear());
+      const v = vue();
+      if(v) v.innerHTML =
+        '<div class="carte" style="text-align:center;padding:36px 22px">'+
+        '<div class="titre" style="font-size:19px">Ton essai gratuit est terminé</div>'+
+        '<div class="vide" style="margin:10px 0 22px">Tu as testé Trakz pendant trois jours, avec des données d\u2019exemple. '+
+        'La version complète fait la même chose avec tes vraies ventes \u2014 sans limite de temps, sans fonction en moins.</div>'+
+        '<a href="index.html#prix" class="btn" style="display:block;text-decoration:none">Voir le tarif \u2014 29 \u20ac une fois</a>'+
+        '<div class="vide" style="margin-top:16px"><a href="index.html" style="color:inherit">\u2190 Retour au site</a></div>'+
+        '</div>';
+      window.rendre = function(){};
+      window.sauver = function(){};
+      return;
+    }
+
+    /* --- pendant l'essai : appli visible, mode Essentiel verrouillé, bandeau --- */
+    montrer(entete()); montrer(nav()); montrer(gear());
+    if(typeof data !== "undefined"){ data.mode = "simple"; try{ sauver(); }catch(e){} }
+
+    if(!document.getElementById("bandeauEssai")){
+      const bandeau = document.createElement("div");
+      bandeau.id = "bandeauEssai";
+      bandeau.style.cssText = "background:var(--ink);color:#fff;padding:9px 132px 9px 16px;font-size:12.5px;"+
+        "line-height:1.4;text-align:center;font-family:system-ui,-apple-system,sans-serif;position:relative;z-index:6";
+      bandeau.innerHTML = "Essai gratuit \u2014 encore "+joursRestants+" jour"+(joursRestants>1?"s":"")+
+        ' \u00b7 <a href="index.html#prix" style="color:#fff;text-decoration:underline;font-weight:600">D\u00e9bloquer la version compl\u00e8te</a>';
+      document.body.insertBefore(bandeau, document.body.firstChild);
+    }
+
+    /* Les modes Complet et Tout afficher restent réservés à la version payée. */
+    document.addEventListener("click", function(e){
+      const b = e.target && e.target.closest && e.target.closest('[data-mode="complet"],[data-mode="tout"]');
+      if(!b) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      if(typeof flash === "function")
+        flash("Réservé à la version complète \u2014 29 \u20ac une fois, sans abonnement.");
+    }, true);
+
+    /* Le sommaire des 22 guides reste consultable ; le texte de chaque partie
+       est réservé à la version payée. */
+    if(typeof vueEbook === "function"){
+      const ebookOriginal = vueEbook;
+      vueEbook = function(){
+        if(typeof ebLivre !== "undefined" && ebLivre !== null &&
+           typeof ebPartie !== "undefined" && ebPartie !== null){
+          const l = EBOOKS[ebLivre];
+          return '<div class="carte">'+
+            '<button class="act" id="ebRetour" style="flex:0 0 auto">\u2039 Tous les guides</button>'+
+            '<div class="titre" style="margin-top:16px;font-size:17px;letter-spacing:0;text-transform:none">'+
+            esc(l.p[ebPartie].t)+'</div>'+
+            '<div class="vide" style="margin-top:10px">Le texte de ce guide fait partie de la version complète. '+
+            'L\u2019essai gratuit donne accès au sommaire des 22 guides, pas encore à leur contenu.</div>'+
+            '<a href="index.html#prix" class="btn" style="display:block;text-decoration:none;margin-top:6px">'+
+            'Débloquer les 22 guides \u2014 29 \u20ac une fois</a></div>';
+        }
+        return ebookOriginal();
+      };
+    }
+  }
+
+  if(!debut){ afficherPorteEmail(); return; }
+  demarrerEssai();
 })();
 </script>
 </body>
