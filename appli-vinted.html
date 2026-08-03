@@ -422,8 +422,110 @@
   .filigrane span{position:absolute;font-size:13px;color:var(--ink);opacity:.07;
     white-space:nowrap;transform:rotate(-30deg);transform-origin:center}
 </style>
+<script>
+/* ==== Contrôle d'accès ====================================================
+   L'application ne s'affiche qu'une fois la session vérifiée. */
+document.documentElement.style.visibility = "hidden";
+</script>
 </head>
 <body>
+<div id="portail" style="position:fixed;inset:0;z-index:9999;background:#F7F3EC;color:#12233A;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:28px;
+  font-family:system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.6">
+  <div style="max-width:340px">
+    <div id="portailTxt">Vérification de ton accès…</div>
+    <a id="portailLien" href="connexion.html" style="display:none;margin-top:18px;
+      padding:12px 20px;border-radius:11px;border:1.5px solid #12233A;color:#12233A;
+      text-decoration:none;font-weight:600">Se connecter</a>
+  </div>
+</div>
+<script src="config.js?v=3"></script>
+<script>
+/* Si config.js ne se charge pas, on ne fait SURTOUT pas semblant : basculer
+   en mode test masquerait la vraie panne. On signale, et on bloque. */
+if(typeof window.CONFIG === "undefined"){
+  window.CONFIG = { nom:"Trakz", prix:"29", devise:"\u20AC", email:"",
+                    lienPaiement:"", modeTest:false, comptesTest:[],
+                    supabaseUrl:"", supabaseKey:"", _manquant:true };
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+
+/* Dit précisément ce qui bloque, plutôt qu'un message générique. */
+function diagnostic(){
+  if(typeof window.CONFIG === "undefined")
+    return "Le fichier config.js n'a pas été chargé. Il doit se trouver au même niveau que cette page. "+
+           "Si tu viens de le redéposer, recharge en vidant le cache.";
+  const c = window.CONFIG;
+  if(c._manquant)
+    return "Le fichier config.js n'est pas en ligne. Vérifie qu'il s'appelle bien "+
+           "config.js (et non config.js.txt) et qu'il a été redéployé avec les autres fichiers.";
+  if(c.modeTest) return null;
+  if(!c.supabaseUrl || !c.supabaseKey)
+    return "config.js est bien chargé, mais ni le mode test ni la base de comptes ne sont activés. "+
+           "Ouvre config.js et mets modeTest à true pour essayer tout de suite.";
+  return null;
+}
+
+(function(){
+  const C = window.CONFIG || {};
+  const txt  = document.getElementById("portailTxt");
+  const lien = document.getElementById("portailLien");
+  window.__CLE_TEST = "acces-mode-test";
+
+  function bloquer(message, proposerConnexion){
+    txt.textContent = message;
+    if(proposerConnexion) lien.style.display = "inline-block";
+    document.documentElement.style.visibility = "visible";
+  }
+  function ouvrir(session){
+    window.__session = session;
+    const p = document.getElementById("portail");
+    if(p) p.remove();
+    document.documentElement.style.visibility = "visible";
+    if(C.modeTest) bandeauTest();
+  }
+  function bandeauTest(){
+    const b = document.createElement("div");
+    b.textContent = "Mode test — ce site n'est pas protégé. À désactiver dans config.js avant la première vente.";
+    b.style.cssText = "background:#B4740F;color:#fff;padding:9px 100px 9px 16px;font-size:13px;line-height:1.4;"+
+      "text-align:center;font-family:system-ui,sans-serif;position:relative;z-index:50";
+    document.body.insertBefore(b, document.body.firstChild);
+  }
+
+  const souciConfig = diagnostic();
+  if(souciConfig){ bloquer(souciConfig, false); return; }
+
+  /* --- Mode test : liste de comptes écrite dans config.js --- */
+  if(C.modeTest){
+    let mail = null;
+    try{ mail = localStorage.getItem(window.__CLE_TEST); }catch(e){}
+    if(!mail){ location.replace("connexion.html"); return; }
+    ouvrir({ user: { email: mail }, test: true });
+    return;
+  }
+
+  const souci = diagnostic();
+  if(souci){ bloquer(souci, false); return; }
+  if(typeof supabase === "undefined"){
+    bloquer("Impossible de vérifier ton accès : la connexion internet est nécessaire au premier chargement.", true);
+    return;
+  }
+
+  const sb = supabase.createClient(C.supabaseUrl, C.supabaseKey);
+  window.__sb = sb;
+
+  sb.auth.getSession().then(function(res){
+    const session = res && res.data && res.data.session;
+    if(!session){ location.replace("connexion.html"); return; }
+    ouvrir(session);
+  }).catch(function(){
+    bloquer("Vérification impossible pour le moment. Réessaie dans un instant.", true);
+  });
+})();
+</script>
+
   <button id="bReglages" aria-label="Réglages"><svg viewBox="0 0 24 24" aria-hidden="true">
     <circle cx="12" cy="12" r="3.1"/>
     <path d="M19.1 14.4a1.5 1.5 0 00.3 1.7l.1.1a1.8 1.8 0 11-2.6 2.6l-.1-.1a1.5 1.5 0 00-1.7-.3 1.5 1.5 0 00-.9 1.4v.2a1.8 1.8 0 11-3.6 0V20a1.5 1.5 0 00-1-1.4 1.5 1.5 0 00-1.7.3l-.1.1a1.8 1.8 0 11-2.6-2.6l.1-.1a1.5 1.5 0 00.3-1.7 1.5 1.5 0 00-1.4-.9H4a1.8 1.8 0 110-3.6H4a1.5 1.5 0 001.4-1 1.5 1.5 0 00-.3-1.7l-.1-.1a1.8 1.8 0 112.6-2.6l.1.1a1.5 1.5 0 001.7.3H9.5a1.5 1.5 0 00.9-1.4V4a1.8 1.8 0 113.6 0v.1a1.5 1.5 0 00.9 1.4 1.5 1.5 0 001.7-.3l.1-.1a1.8 1.8 0 112.6 2.6l-.1.1a1.5 1.5 0 00-.3 1.7v.1a1.5 1.5 0 001.4.9h.2a1.8 1.8 0 110 3.6H20a1.5 1.5 0 00-1.4.9z"/>
@@ -5766,6 +5868,58 @@ majTousPrixMoyens();
 if(!data.config){ configInitiale(); } else { appliquerConfig(); rendre(); }
 phLibCharger().then(() => { if(data.config && onglet === "photo") rendre(); });
 if(window.indexedDB && data.config){ setTimeout(()=>svSauver(true), 1500); }
+</script>
+<script>
+/* ==== Compte : filigrane automatique et déconnexion ====================== */
+(function(){
+  function courriel(){
+    const s = window.__session;
+    return (s && s.user && s.user.email) || "";
+  }
+
+  /* Le filigrane des guides porte l'adresse du compte, sans rien à saisir. */
+  function marquer(){
+    const mail = courriel();
+    if(!mail || typeof data === "undefined") return;
+    data.licence = data.licence || {};
+    if(data.licence.id !== mail){
+      data.licence.id = mail;
+      try{ sauver(); }catch(e){}
+    }
+  }
+
+  /* Carte « Mon compte » ajoutée au panneau de réglages. */
+  if(typeof vueReglages === "function"){
+    const original = vueReglages;
+    vueReglages = function(){
+      const mail = courriel();
+      const test = window.__session && window.__session.test;
+      return original() +
+        '<div class="carte"><div class="titre">Mon compte</div>' +
+        '<div class="meta">Connecté en tant que <strong>' + esc(mail || "—") + '</strong>. ' +
+        'Cette adresse apparaît en filigrane sur les guides.</div>' +
+        (test ? '<div class="note">Mode test actif : ce site n\'est protégé par rien. '+
+                'Renseigne Supabase dans config.js et repasse modeTest à false avant de vendre.</div>' : '') +
+        '<button class="btn2" id="btnDeconnexion">Se déconnecter</button></div>';
+    };
+  }
+
+  document.addEventListener("click", function(e){
+    const b = e.target && e.target.closest && e.target.closest("#btnDeconnexion");
+    if(!b) return;
+    e.preventDefault();
+    try{ localStorage.removeItem(window.__CLE_TEST || "acces-mode-test"); }catch(err){}
+    if(window.__sb) window.__sb.auth.signOut().then(function(){ location.replace("connexion.html"); });
+    else location.replace("connexion.html");
+  });
+
+  /* La session arrive de façon asynchrone : on repasse tant qu'elle manque. */
+  let essais = 0;
+  const t = setInterval(function(){
+    if(window.__session){ marquer(); clearInterval(t); }
+    else if(++essais > 40) clearInterval(t);
+  }, 250);
+})();
 </script>
 </body>
 </html>

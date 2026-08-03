@@ -101,6 +101,9 @@
   h1 em{font-style:normal;color:var(--signal)}
   .chapo{font-size:clamp(17px,2.1vw,20px);color:var(--doux);max-width:33em;margin-top:22px}
   .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px;align-items:center}
+  .lien-demo{margin:16px 0 0;font-size:14.5px;color:var(--doux)}
+  .lien-demo a{color:var(--signal);font-weight:600;text-decoration:none;border-bottom:1.5px solid rgba(47,85,115,.32)}
+  .lien-demo a:hover{border-color:var(--signal)}
   .rassure{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:20px;font-size:14px;color:var(--doux)}
   .rassure span{display:flex;align-items:center;gap:7px}
   .rassure span::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--bon)}
@@ -826,6 +829,10 @@
       <span>L'application<small>Les sept outils, en détail</small></span>
       <span class="fleche">→</span>
     </a>
+    <a class="menu-rang" href="appli-vinted-demo.html" target="_blank" rel="noopener">
+      <span>Essayer la démo<small>Sans compte, avec des données d'exemple</small></span>
+      <span class="fleche">→</span>
+    </a>
     <a class="menu-rang" data-cible="#demarrage">
       <span>Mise en route<small>Les huit questions du premier lancement</small></span>
       <span class="fleche">→</span>
@@ -881,6 +888,7 @@
         <a class="btn" id="btnHero" href="#prix">Obtenir l'accès — 29 €</a>
         <a class="btn creux" href="connexion.html">J'ai déjà un compte</a>
       </div>
+      <p class="lien-demo">Envie de voir avant ? <a href="appli-vinted-demo.html" target="_blank" rel="noopener">Essayer la démo, sans compte à créer →</a></p>
       <div class="rassure">
         <span>Aucun accès à ton compte Vinted</span>
         <span>Factures et registres conformes</span>
