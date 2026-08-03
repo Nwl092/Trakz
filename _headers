@@ -1,0 +1,14 @@
+# Netlify lit ce fichier pour régler les en-têtes HTTP.
+#
+# config.js ne doit JAMAIS être gardé en cache : c'est le fichier que tu
+# modifies, et un navigateur qui sert l'ancienne version donne l'impression
+# que tes changements n'ont pas été pris en compte.
+
+/config.js
+  Cache-Control: no-store, must-revalidate
+
+# Les pages elles-mêmes sont revalidées à chaque visite : une mise à jour
+# arrive ainsi chez tes clients sans qu'ils aient à vider quoi que ce soit.
+
+/*.html
+  Cache-Control: no-cache, must-revalidate
