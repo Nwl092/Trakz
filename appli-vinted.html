@@ -2418,7 +2418,7 @@ function phVueLib(){
          '<div class="meta">'+ph.length+' photo'+(ph.length>1?'s':'')+
          (it ? ' · '+esc(COMPTES[it.compte]||"") : '')+'</div></div></div>'+
          '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px">'+
-         ph.map(p=>'<div style="position:relative"><img src="'+p.url+'" style="width:100%;border-radius:8px;border:1px solid var(--line);display:block">'+
+         ph.map(p=>'<div style="position:relative"><img src="'+p.url+'" alt="" style="width:100%;border-radius:8px;border:1px solid var(--line);display:block">'+
            '<button class="act" data-phsup="'+esc(p.id)+'" style="position:absolute;top:2px;right:2px;flex:0 0 22px;min-width:22px;height:22px;padding:0;line-height:1;border-radius:6px">×</button></div>').join("")+
          '</div>'+
          (it ? '<div class="champ" style="margin:8px 0 0"><label>Nom exact (optionnel)</label>'+
@@ -2487,7 +2487,7 @@ function vuePhoto(){
   const perso = phPerso();
   return '<div class="carte"><div class="titre">La photo</div>'+
     '<div class="champ"><input type="file" id="phFic" accept="image/*"></div>'+
-    '<div class="zone" id="phZone" style="display:'+(phImg?"block":"none")+'"><img id="phApercu"><div class="cadre" id="phCadre"></div></div>'+
+    '<div class="zone" id="phZone" style="display:'+(phImg?"block":"none")+'"><img id="phApercu" alt=""><div class="cadre" id="phCadre"></div></div>'+
     '<div class="meta">Trace le cadre au doigt sur l\'aperçu pour recadrer librement. Pose l\'article sur un fond clair, à la lumière du jour, sans flash.</div></div>'+
 
     '<div class="carte"><div class="titre">Préréglages</div>'+
@@ -2522,7 +2522,7 @@ function vuePhoto(){
     '<div class="meta">« Blanchir le fond » ne marche que sur un fond déjà clair et uni. Monte doucement : trop fort, il mange les zones claires de l\'article.</div></div>'+
 
     '<div class="carte"><div class="titre">Résultat</div>'+
-    '<img id="phResultat" style="width:100%;border-radius:12px;border:1px solid var(--line);background:var(--card);display:block">'+
+    '<img id="phResultat" alt="" style="width:100%;border-radius:12px;border:1px solid var(--line);background:var(--card);display:block">'+
     '<canvas id="phSortie" style="display:none"></canvas>'+
     '<div class="meta">Appui long sur l\'image → « Ajouter aux photos ».</div>'+
     '<button class="btn" id="phShare" style="margin-top:10px">Partager ou enregistrer</button>'+
@@ -2549,7 +2549,7 @@ function vuePhoto(){
     '<div class="meta" style="margin-top:0">Applique les réglages actuels à toutes les photos sélectionnées. Cadrage carré, sans recadrage libre.</div>'+
     (phLot.length
       ? '<div class="grille" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px">'+
-        phLot.map(u=>'<img src="'+u+'" style="width:100%;border-radius:10px;border:1px solid var(--line)">').join("")+'</div>'+
+        phLot.map(u=>'<img src="'+u+'" alt="" style="width:100%;border-radius:10px;border:1px solid var(--line)">').join("")+'</div>'+
         '<div class="meta">Appui long sur chaque image pour l\'enregistrer.</div>'
       : '')+'</div>';
 }
@@ -2869,7 +2869,7 @@ function vueBordereau(){
 
     '<div class="carte"><div class="titre">Étiquette</div>'+
     '<div class="champ"><input type="file" id="etqFic" accept="image/*"></div>'+
-    '<div class="zone" id="etqZone" style="display:'+(etqImg?"block":"none")+'"><img id="etqApercu"'+(etqImg?' src="'+etqImg.src+'"':'')+'><div class="cadre" id="etqCadreEl"></div></div>'+
+    '<div class="zone" id="etqZone" style="display:'+(etqImg?"block":"none")+'"><img id="etqApercu" alt=""'+(etqImg?' src="'+etqImg.src+'"':'')+'><div class="cadre" id="etqCadreEl"></div></div>'+
     '<div class="meta" id="etqInfos">Trace le cadre au doigt sur la partie à imprimer.</div>'+
     '<div class="seg" style="margin-top:14px" id="etqPresets">'+
       '<button data-p="gauche">Moitié gauche</button><button data-p="droite">Moitié droite</button>'+
