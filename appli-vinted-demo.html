@@ -5932,7 +5932,7 @@ if(window.indexedDB && data.config){ setTimeout(()=>svSauver(true), 1500); }
       bandeau.style.cssText = "background:var(--ink);color:#fff;padding:9px 132px 9px 16px;font-size:12.5px;"+
         "line-height:1.4;text-align:center;font-family:system-ui,-apple-system,sans-serif;position:relative;z-index:6";
       bandeau.innerHTML = "Essai gratuit \u2014 encore "+joursRestants+" jour"+(joursRestants>1?"s":"")+
-        ' \u00b7 3 outils sur 7 \u00b7 <a href="index.html#prix" style="color:#fff;text-decoration:underline;font-weight:600">D\u00e9bloquer la version compl\u00e8te</a>';
+        ' \u00b7 2 outils sur 7 \u00b7 <a href="index.html#prix" style="color:#fff;text-decoration:underline;font-weight:600">D\u00e9bloquer la version compl\u00e8te</a>';
       document.body.insertBefore(bandeau, document.body.firstChild);
     }
 
@@ -5945,11 +5945,15 @@ if(window.indexedDB && data.config){ setTimeout(()=>svSauver(true), 1500); }
         flash("R\u00e9serv\u00e9 \u00e0 la version compl\u00e8te \u2014 29 \u20ac une fois, sans abonnement.");
     }, true);
 
-    /* Seuls Annonce, Ventes et Stock sont ouverts pendant l'essai : Photo,
-       Bordereau, Bilan et Guides sont réservés à la version complète. On
-       verrouille dans rendre() lui-même, pas seulement dans la nav, pour
-       que même un lien croisé interne ne puisse pas contourner l'essai. */
-    const ONGLETS_INTERDITS = ["photo", "bordereau", "bilan", "ebook"];
+    /* Seuls Annonce et Ventes sont ouverts pendant l'essai : Photo,
+       Bordereau, Stock, Bilan et Guides restent visibles dans la barre \u2014
+       pour montrer ce que l'appli sait faire \u2014 mais r\u00e9serv\u00e9s \u00e0
+       la version compl\u00e8te. Le bouton reste cliquable : il redirige vers
+       Annonce avec un message clair, plut\u00f4t que de dispara\u00eetre sans
+       explication. Verrouill\u00e9 dans rendre() lui-m\u00eame, pas seulement
+       dans la nav, pour qu'un lien crois\u00e9 interne ne puisse pas
+       contourner l'essai. */
+    const ONGLETS_INTERDITS = ["photo", "bordereau", "stock", "bilan", "ebook"];
     if(typeof rendre === "function"){
       const rendreOriginal = rendre;
       rendre = function(){
@@ -5959,13 +5963,16 @@ if(window.indexedDB && data.config){ setTimeout(()=>svSauver(true), 1500); }
             flash("R\u00e9serv\u00e9 \u00e0 la version compl\u00e8te \u2014 29 \u20ac une fois, sans abonnement.");
         }
         /* L'assistant d'accueil peut lui-m\u00eame choisir Complet ou Tout
-           afficher (\u00e9tape \u00ab trois modes \u00bb) apr\u00e8s notre propre r\u00e9glage
-           initial : on le reforce ici, \u00e0 chaque rendu, pour que \u00e7a tienne. */
+           afficher (\u00e9tape \u00ab trois modes \u00bb) apr\u00e8s notre propre
+           r\u00e9glage initial : on le reforce ici, \u00e0 chaque rendu, pour que
+           \u00e7a tienne. */
         if(typeof data !== "undefined" && data.mode !== "simple"){ data.mode = "simple"; }
         rendreOriginal();
-        document.querySelectorAll("nav button").forEach(function(b){
-          if(ONGLETS_INTERDITS.indexOf(b.dataset.o) !== -1) b.style.display = "none";
-        });
+        /* Le mode Essentiel masque normalement Bordereau dans la nav (hors
+           essai, c'est voulu). Ici on veut les sept boutons visibles, même
+           verrouillés : on annule ce masquage précis après coup. */
+        const bBordereau = document.querySelector('nav button[data-o="bordereau"]');
+        if(bBordereau) bBordereau.style.display = "";
       };
       /* La toute première image de l'appli (avant l'essai) a pu être dessinée
          avec l'ancien rendre() — non verrouillé. On corrige tout de suite. */
