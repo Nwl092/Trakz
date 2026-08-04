@@ -14,10 +14,9 @@ window.CONFIG = {
   devise:     "€",
 
   /* Prix de lancement. Laisse vide pour ne rien afficher de particulier.
-     N'annonce un nombre de places que si tu comptes vraiment augmenter
-     après : une rareté inventée se retourne toujours contre le vendeur. */
+     Pas de compte de places restantes ici : une rareté inventée se
+     retourne toujours contre le vendeur. */
   prixLancement:   "29",
-  placesLancement: "30",
 
   /* Lien de paiement (Stripe Payment Link, Gumroad, Payhip…). */
   lienPaiement: "https://buy.stripe.com/28EbITeL1fVV83l3M863K01",

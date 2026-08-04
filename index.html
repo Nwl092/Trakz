@@ -39,7 +39,7 @@
     --encre:#12233A; --papier:#F7F3EC; --carte:#FFFFFF;
     --signal:#2F5573; --sable:#F1E9D6; --trait:#E3DCC9; --doux:#66605A;
     --bon:#1D6E4F; --alerte:#9E2B2B; --ambre:#96600A;
-    --cta:#B8451A; --cta-fonce:#8C3810;
+    --cta:#C24618; --cta-fonce:#95340F;
     --max:1120px;
   }
   *{box-sizing:border-box}
@@ -1759,7 +1759,10 @@ if(typeof window.CONFIG === "undefined"){
       mt2.textContent = C.prixLancement;
       if(pa){
         pa.style.display = "inline-block";
-        if(C.placesLancement) pa.textContent = "Prix de lancement · " + C.placesLancement + " premiers";
+        /* Pas de compte à rebours de places : on ne l'affiche que si elle est
+           réellement suivie quelque part, ce qui n'est pas le cas ici — une
+           rareté inventée se retourne toujours contre le vendeur. */
+        pa.textContent = "Prix de lancement";
       }
     }
   }

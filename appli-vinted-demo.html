@@ -5812,6 +5812,38 @@ if(window.indexedDB && data.config){ setTimeout(()=>svSauver(true), 1500); }
   const gear = () => document.getElementById("bReglages");
   const vue = () => document.getElementById("vue");
 
+  /* L'assistant d'accueil en huit étapes est fait pour un vrai compte
+     payant. Pour un essai de trois jours, c'est trop de friction avant
+     même d'avoir vu l'appli : on saute directement à des réglages
+     raisonnables (les mêmes valeurs par défaut que l'assistant propose),
+     sans rien demander. Les vraies données restent à zéro. */
+  function sauterAssistant(){
+    if(typeof wz === "undefined" || !wz) return;
+    data.config = {
+      boutique: "Ma boutique",
+      comptes: ["Vinted", "Vinted 2"],
+      categories: ["Vêtements", "Chaussures", "Sacs", "Accessoires", "Électronique", "Autre"],
+      niveau: "progresse",
+      activite: "mixte",
+      statut: "aucun"
+    };
+    data.mode = "simple";
+    data.delaiFour = 14;
+    data.objectif = 0;
+    data.maxJour = 4;
+    data.coutEmballage = 0.4;
+    data.tauxCotis = 0;
+    data.acre = "non";
+    data.ventes = []; data.stock = []; data.annonces = [];
+    if(typeof appliquerConfig === "function") appliquerConfig();
+    const nv = nav(); if(nv) nv.style.display = "flex";
+    const brF = gear(); if(brF) brF.style.display = "";
+    const hdr = entete();
+    if(hdr && typeof HEADER_ORIG !== "undefined") hdr.innerHTML = HEADER_ORIG;
+    if(typeof brancherReglages === "function") brancherReglages();
+    wz = null;
+  }
+
   /* Best effort : si la table n'existe pas encore côté Supabase (voir
      GUIDE-SUPABASE.md, étape 12), l'essai démarre quand même — on ne
      bloque jamais l'accès pour un problème de collecte d'e-mail. */
@@ -5890,6 +5922,7 @@ if(window.indexedDB && data.config){ setTimeout(()=>svSauver(true), 1500); }
     }
 
     /* --- pendant l'essai : appli visible, seuls Annonce / Ventes / Stock ouverts --- */
+    sauterAssistant();
     montrer(entete()); montrer(nav()); montrer(gear());
     if(typeof data !== "undefined"){ data.mode = "simple"; try{ sauver(); }catch(e){} }
 
